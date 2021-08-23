@@ -1,0 +1,44 @@
+{
+  "name": "noem/framework-module",
+  "description": "description",
+  "type": "library",
+  "minimum-stability": "stable",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "biont",
+      "email": "arbelzapf@gmail.com"
+    }
+  ],
+  "require": {
+    "noem/state-machine": "dev-master",
+    "noem/state-machine-loader": "dev-master"
+  },
+  "require-dev": {
+    "composer/composer": "^2.0",
+    "phpunit/phpunit": "^9.5",
+    "mockery/mockery": "^1.4",
+    "nunomaduro/collision": "^5.8",
+    "squizlabs/php_codesniffer": "^3.6"
+  },
+  "extra": {
+    "noem": {
+      "factories": "factories.php"
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Noem\\Framework\\": "src/"
+    },
+    "files": [
+      "inc/functions.php"
+    ]
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "Noem\\Framework\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+  }
+}
