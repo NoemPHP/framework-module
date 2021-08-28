@@ -12,7 +12,8 @@
     }
   ],
   "require": {
-    "lium/event-dispatcher": "dev-master"
+    "lium/event-dispatcher": "dev-master",
+    "noem/container": "dev-main"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5",
