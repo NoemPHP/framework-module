@@ -12,9 +12,7 @@
     }
   ],
   "require": {
-    "noem/state-machine": "dev-master",
-    "noem/state-machine-loader": "dev-master",
-    "yiisoft/event-dispatcher": "^1.0"
+    "lium/event-dispatcher": "dev-master"
   },
   "require-dev": {
     "phpunit/phpunit": "^9.5",
@@ -23,7 +21,8 @@
   },
   "extra": {
     "noem": {
-      "factories": "factories.php"
+      "factories": "factories.php",
+      "extensions": "extensions.php"
     }
   },
   "autoload": {
@@ -39,6 +38,10 @@
       "Noem\\Framework\\Tests\\": "tests/"
     }
   },
-  "scripts": {
-  }
+  "repositories": [
+    {
+      "type": "vcs",
+      "url": "https://github.com/Biont/event-dispatcher"
+    }
+  ]
 }
