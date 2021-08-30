@@ -6,12 +6,11 @@ namespace Noem\Framework;
 
 use Lium\EventDispatcher\EventDispatcher;
 use Lium\EventDispatcher\ListenerProvider\DefaultListenerProvider;
+use Noem\Container\Attribute\Description;
 use Noem\Container\Attribute\Tag;
 use Noem\Container\Attribute\Tagged;
 use Noem\Container\Container;
-use Noem\StateMachineModule\Attribute\Parallel;
 use Noem\StateMachineModule\Attribute\State;
-use Noem\StateMachineModule\Attribute\StateMachineTag;
 use Noem\StateMachineModule\Attribute\Transition;
 use Psr\EventDispatcher\EventDispatcherInterface;
 use Psr\EventDispatcher\ListenerProviderInterface as Provider;
@@ -20,21 +19,32 @@ use Throwable;
 return [
     'state.' . StateName::OFF =>
         #[State(name: StateName::OFF)]
-        fn(): callable => stateFactory(),
+        fn(): callable => state(),
+
     'state.' . StateName::ON =>
         #[State(name: StateName::ON, parallel: true)]
-        fn() => stateFactory(),
+        fn(): callable => state(),
+
     'transition.off|on' =>
         #[Transition(from: 'off', to: 'on')]
-        fn() => fn(object $t) => !$t instanceof \Throwable,
+        fn(): callable => fn(object $t) => !$t instanceof \Throwable,
+
     'example-listener' =>
         #[Tag('event-listener')]
-        fn() => function (\stdClass $event) {
+        fn(): callable => function (\stdClass $event) {
             $hi = true;
         },
-    Provider::class => fn(#[Tagged('event-listener')] callable ...$l) => new DefaultListenerProvider($l),
-    EventDispatcherInterface::class => fn(Provider $p) => new EventDispatcher($p),
-    'state-machine.initial-state' => fn() => 'off',
+
+    Provider::class =>
+        #[Description('The default listener provider that consumes all Listeners with the "event-listener" Tag')]
+        fn(#[Tagged('event-listener')] callable ...$l) => new DefaultListenerProvider($l),
+
+    EventDispatcherInterface::class =>
+        #[Description('The global event dispatcher of the Noem Application')]
+        fn(Provider $p) => new EventDispatcher($p),
+
+    'state-machine.initial-state' => fn() => StateName::OFF,
+
     'framework.move-to-error-state-on-exceptions' =>
         #[Tag('exception-handler')]
         fn(Container $c) => function (Throwable $e) use ($c) {
@@ -49,6 +59,7 @@ return [
                 // ...
             }
         },
+
     'state-machine.guard.off-to-on' => fn() => function (object $trigger): bool {
         return !$trigger instanceof \Throwable;
     }
