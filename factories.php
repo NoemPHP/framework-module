@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Noem\Framework;
 
+use Composer\Autoload\ClassLoader;
 use Lium\EventDispatcher\EventDispatcher;
 use Lium\EventDispatcher\ListenerProvider\DefaultListenerProvider;
 use Noem\Container\Attribute\Description;
@@ -17,11 +18,18 @@ use Psr\EventDispatcher\ListenerProviderInterface as Provider;
 use Throwable;
 
 return [
-    'state.' . StateName::OFF =>
+    'vendor-dir' =>
+        #[Description('The path to the Composer vendor folder')]
+        function (): string {
+            $classLoaderRef = new \ReflectionClass(ClassLoader::class);
+
+            return dirname($classLoaderRef->getFileName(), 2);
+        },
+    'state.'.StateName::OFF =>
         #[State(name: StateName::OFF)]
         fn(): callable => state(),
 
-    'state.' . StateName::ON =>
+    'state.'.StateName::ON =>
         #[State(name: StateName::ON, parallel: true)]
         fn(): callable => state(),
 
@@ -62,5 +70,5 @@ return [
 
     'state-machine.guard.off-to-on' => fn() => function (object $trigger): bool {
         return !$trigger instanceof \Throwable;
-    }
+    },
 ];
