@@ -4,12 +4,15 @@ declare(strict_types=1);
 
 namespace Noem\Framework;
 
+use Dotenv\Dotenv;
 use Invoker\InvokerInterface;
 use Noem\Container\Container;
 use Noem\Container\Provider;
 
 function bootstrap(Provider ...$providers): callable
 {
+    $dotenv = Dotenv::createImmutable(getcwd());
+    $dotenv->safeLoad();
     $c = new Container(...$providers);
     $invoker = $c->get(InvokerInterface::class);
     ErrorHandler::init(...array_map(fn($id) => $c->get($id), $c->getIdsWithTag('exception-handler')));
