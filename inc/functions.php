@@ -8,6 +8,7 @@ use Dotenv\Dotenv;
 use Invoker\InvokerInterface;
 use Noem\Container\Container;
 use Noem\Container\Provider;
+use Noem\State\EventManager;
 
 function bootstrap(Provider ...$providers): callable
 {
@@ -17,11 +18,26 @@ function bootstrap(Provider ...$providers): callable
     $invoker = $c->get(InvokerInterface::class);
     ErrorHandler::init(...array_map(fn($id) => $c->get($id), $c->getIdsWithTag('exception-handler')));
 
-    $c->get('state-machine')->trigger((object)['hello' => 'world']);
+    $stateMachine = $c->get('state-machine');
+    $observer = $c->get('state-machine.observer');
+    assert($observer instanceof EventManager);
 
-    return function (callable ...$initializers) use ($invoker) {
-        foreach ($initializers as $initializer) {
-            $invoker->call($initializer);
+    return function (array|callable $initializers) use ($stateMachine, $invoker, $observer) {
+        if (!is_array($initializers)) {
+            $initializers = [StateName::ON => $initializers];
         }
+        foreach ($initializers as $state => $initializer) {
+            $observer->addEnterStateHandler(
+                $state,
+                function () use ($invoker, $initializer) {
+                    $invoker->call($initializer);
+                }
+            );
+        }
+
+        return function (?object $event = null) use ($stateMachine, $initializers) {
+            $event = $event ?? (object)['hello' => 'world'];
+            $stateMachine->trigger($event);
+        };
     };
 }
