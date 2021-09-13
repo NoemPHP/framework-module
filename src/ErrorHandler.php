@@ -2,14 +2,13 @@
 
 declare(strict_types=1);
 
-
 namespace Noem\Framework;
-
 
 use ErrorException;
 
 class ErrorHandler
 {
+
     public static function init(callable $exceptionHandler, callable ...$exceptionHandlers)
     {
         /**
@@ -29,6 +28,9 @@ class ErrorHandler
             string $errfile,
             int $errline,
         ) {
+            if (!(error_reporting() & $errno)) {
+                return false; // This error was suppressed
+            }
             throw new ErrorException($errstr, 0, $errno, $errfile, $errline);
         };
         set_error_handler($handleError);
@@ -59,6 +61,7 @@ class ErrorHandler
         $errors |= E_CORE_WARNING;
         $errors |= E_COMPILE_ERROR;
         $errors |= E_COMPILE_WARNING;
+
         return ($level & $errors) > 0;
     }
 }
